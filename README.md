@@ -15,7 +15,7 @@ All other pen absolute InputEvents are passed without changes like ABS_X, ABS_Y,
 
 ## Parameters
 
-run command with
+Run command with :
 ```
-stylus-remap --help
+absolute-remap --help
 ```
