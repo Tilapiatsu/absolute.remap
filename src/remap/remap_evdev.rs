@@ -124,9 +124,9 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
                         let outputs = stylus_sm.handle_event(&mut context, ev);
 
                         if !outputs.is_empty() {
-                            virtual_tablet.emit(&outputs)?;
+                            // virtual_tablet.emit(&outputs)?;
                             for o in outputs {
-                                // t_batch.push(o);
+                                t_batch.push(o);
                                 info!("remapped : {:?}", o);
                             }
                         }
@@ -144,9 +144,8 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
                     if !*forward {
                         continue;
                     }
-                    let forwarded = InputEvent::new_now(ev.event_type().0, ev.code(), ev.value());
 
-                    t_batch.push(forwarded);
+                    t_batch.push(ev);
                 }
             }
             if ev.event_type() == EventType::SYNCHRONIZATION {
