@@ -3,6 +3,7 @@ pub mod lmb;
 pub mod mmb;
 pub mod rmb;
 use evdev::{InputEvent, KeyCode};
+use log::info;
 
 type Output = InputEvent;
 type Event = InputEvent;
@@ -48,6 +49,7 @@ impl Context {
 
     pub fn update(&mut self, key: KeyCode, value: i32) {
         let pressed = value != 0;
+        // info!("Input : {:?}, {:?}", key, pressed);
 
         match key {
             KeyCode::BTN_TOOL_PEN => self.pen = pressed, // stylus is in range

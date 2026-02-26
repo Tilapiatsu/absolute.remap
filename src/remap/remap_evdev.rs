@@ -112,11 +112,12 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
 
                     if !outputs.is_empty() {
                         for o in &outputs {
-                            debug!("{:?}", o);
+                            debug!("Remapping {:?}", o);
                         }
 
                         virtual_device.emit(&outputs)?;
                     }
+                    continue;
                 }
                 // -----------------------------
                 // Forward everything else
@@ -135,6 +136,7 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
                 }
             }
             if ev.event_type() == EventType::SYNCHRONIZATION {
+                batch.push(InputEvent::new(ev.event_type().0, ev.code(), ev.value()));
                 virtual_device.emit(&batch)?;
                 batch.clear();
             }

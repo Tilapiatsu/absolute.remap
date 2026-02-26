@@ -23,17 +23,10 @@ impl State<Context, Event, Output> for MMB {
         }
 
         let key = KeyCode::new(event.code());
-        // let value = event.pressed();
 
         match key {
-            KeyCode::BTN_STYLUS2 if ctx.touch => {
-                ctx.stylus2 = event.pressed();
-                Transition::Change(Box::new(LMB), Vec::new())
-            }
-            KeyCode::BTN_TOUCH if !ctx.touch => {
-                ctx.touch = event.pressed();
-                Transition::Change(Box::new(Idle), Vec::new())
-            }
+            KeyCode::BTN_STYLUS2 if ctx.touch => Transition::Change(Box::new(LMB), Vec::new()),
+            KeyCode::BTN_TOUCH if !ctx.touch => Transition::Change(Box::new(Idle), Vec::new()),
             _ => Transition::Stay(Vec::new()),
         }
     }

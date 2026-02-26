@@ -25,37 +25,11 @@ impl State<Context, Event, Output> for Idle {
         let key = KeyCode::new(event.code());
 
         match key {
-            KeyCode::BTN_STYLUS if !ctx.touch => {
-                ctx.stylus1 = event.pressed();
-                Transition::Stay(Vec::new())
-            }
-            KeyCode::BTN_STYLUS2 if !ctx.touch => {
-                ctx.stylus2 = event.pressed();
-                Transition::Stay(Vec::new())
-            }
-            KeyCode::BTN_TOUCH if ctx.stylus1 => {
-                ctx.touch = event.pressed();
-
-                Transition::Change(
-                    Box::new(RMB),
-                    vec![
-                        InputEvent::new(1, KeyCode::BTN_TOUCH.code(), 1),
-                        InputEvent::new(1, KeyCode::BTN_TOOL_PEN.code(), 1),
-                    ],
-                )
-            }
-            KeyCode::BTN_TOUCH if ctx.stylus2 => {
-                ctx.touch = event.pressed();
-                Transition::Change(
-                    Box::new(MMB),
-                    vec![
-                        InputEvent::new(1, KeyCode::BTN_TOUCH.code(), 1),
-                        InputEvent::new(1, KeyCode::BTN_TOOL_PEN.code(), 1),
-                    ],
-                )
-            }
+            KeyCode::BTN_STYLUS if !ctx.touch => Transition::Stay(Vec::new()),
+            KeyCode::BTN_STYLUS2 if !ctx.touch => Transition::Stay(Vec::new()),
+            KeyCode::BTN_TOUCH if ctx.stylus1 => Transition::Change(Box::new(RMB), Vec::new()),
+            KeyCode::BTN_TOUCH if ctx.stylus2 => Transition::Change(Box::new(MMB), Vec::new()),
             KeyCode::BTN_TOUCH if !ctx.stylus1 && !ctx.stylus2 => {
-                ctx.touch = true;
                 Transition::Change(Box::new(LMB), Vec::new())
             }
             _ => Transition::Stay(Vec::new()),
