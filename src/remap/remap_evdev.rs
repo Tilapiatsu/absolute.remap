@@ -113,19 +113,29 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
             match ev.event_type() {
                 EventType::KEY => {
                     let key = KeyCode::new(ev.code());
-
                     context.update_input(key, ev.value());
+                    if [
+                        KeyCode::BTN_TOUCH,
+                        KeyCode::BTN_STYLUS,
+                        KeyCode::BTN_STYLUS2,
+                    ]
+                    .contains(&key)
+                    {
+                        let outputs = stylus_sm.handle_event(&mut context, ev);
 
-                    let outputs = stylus_sm.handle_event(&mut context, ev);
-
-                    if !outputs.is_empty() {
-                        virtual_tablet.emit(&outputs)?;
-                        for o in outputs {
-                            t_batch.push(o);
+                        if !outputs.is_empty() {
+                            virtual_tablet.emit(&outputs)?;
+                            for o in outputs {
+                                // t_batch.push(o);
+                                info!("remapped : {:?}", o);
+                            }
                         }
+                    } else {
+                        t_batch.push(ev);
                     }
-
-                    continue;
+                }
+                EventType::ABSOLUTE => {
+                    t_batch.push(ev);
                 }
                 // -----------------------------
                 // Forward everything else
