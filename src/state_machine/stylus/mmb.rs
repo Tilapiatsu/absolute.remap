@@ -10,21 +10,21 @@ impl State<Context, Event, Output> for MMB {
     fn enter(&mut self, _ctx: &mut Context) -> Vec<Output> {
         info!("mmb pressed");
         let ev = self.id().pressed;
-        vec![
-            // InputEvent::new(EventType::KEY.0, KeyCode::BTN_TOUCH.code(), 1),
-            InputEvent::new_now(ev.event_type().0, ev.code(), ev.value()),
-            // InputEvent::new_now(EventType::SYNCHRONIZATION.0, 0, 0),
-        ]
+        vec![InputEvent::new_now(
+            ev.event_type().0,
+            ev.code(),
+            ev.value(),
+        )]
     }
 
     fn exit(&mut self, _ctx: &mut Context) -> Vec<Output> {
         info!("mmb released");
         let ev = self.id().released;
-        vec![
-            // InputEvent::new(EventType::KEY.0, KeyCode::BTN_TOUCH.code(), 0),
-            InputEvent::new_now(ev.event_type().0, ev.code(), ev.value()),
-            // InputEvent::new_now(EventType::SYNCHRONIZATION.0, 0, 0),
-        ]
+        vec![InputEvent::new_now(
+            ev.event_type().0,
+            ev.code(),
+            ev.value(),
+        )]
     }
 
     fn update(&mut self, ctx: &mut Context, event: Event) -> Transition<Context, Event, Output> {
