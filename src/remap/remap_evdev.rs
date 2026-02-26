@@ -61,46 +61,13 @@ static ABS_EVENTS: [&str; 9] = [
 pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
     let mut device = Device::open(path).unwrap();
     let mut tablet_builder = VirtualDevice::builder()?.name("Vvirtual Cintiq Tablet");
-    let mut mouse_builder = VirtualDevice::builder()?.name("Virtual Stylus Mouse");
 
     println!("Grabbing device: {}", device.name().unwrap_or("unknown"));
     device.grab()?;
 
-    let abs_x = device
-        .get_absinfo()
-        .unwrap()
-        .find(|(axis, _)| *axis == AbsoluteAxisCode::ABS_X)
-        .unwrap();
-
-    let abs_y = device
-        .get_absinfo()
-        .unwrap()
-        .find(|(axis, _)| *axis == AbsoluteAxisCode::ABS_Y)
-        .unwrap();
-
-    let absolute_axis_x_setup: UinputAbsSetup = UinputAbsSetup::new(abs_x.0, abs_x.1);
-    let absolute_axis_y_setup: UinputAbsSetup = UinputAbsSetup::new(abs_y.0, abs_y.1);
-
-    mouse_builder = mouse_builder.with_absolute_axis(&absolute_axis_x_setup)?;
-    mouse_builder = mouse_builder.with_absolute_axis(&absolute_axis_y_setup)?;
-
     if let Some(keys) = device.supported_keys() {
         tablet_builder = tablet_builder.with_keys(keys)?;
     }
-
-    let mut keys: AttributeSet<KeyCode> = AttributeSet::new();
-    for code in KeyCode::KEY_RESERVED.code()..KeyCode::BTN_TRIGGER_HAPPY40.code() {
-        let key = KeyCode::new(code);
-        let name = format!("{key:?}");
-        if MOUSE_BTNS.contains(&&*name) {
-            keys.insert(key);
-            if *debug {
-                debug!("Register {:?}", name);
-            }
-        }
-    }
-
-    mouse_builder = mouse_builder.with_keys(&keys)?;
 
     #[warn(clippy::collapsible_if)]
     if *forward {
@@ -133,7 +100,6 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
     }
 
     let mut virtual_tablet = tablet_builder.build()?;
-    // let mut virtual_mouse = mouse_builder.build()?;
 
     let mut context = stylus::Context::new();
     let mut stylus_sm = StateMachine::new(Box::new(stylus::idle::Idle));
@@ -141,10 +107,7 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
     info!("Virtual device created.");
 
     loop {
-        let mut m_batch: Vec<InputEvent> = Vec::new();
-
         let mut t_batch: Vec<InputEvent> = Vec::new();
-        let mut o_batch: Vec<InputEvent> = Vec::new();
 
         for ev in device.fetch_events()? {
             match ev.event_type() {
@@ -157,34 +120,13 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
 
                     if !outputs.is_empty() {
                         virtual_tablet.emit(&outputs)?;
-                        // if *debug {
-                        //     for o in &outputs {
-                        //         debug!("{:?}", *o);
-                        //     }
-                        // }
                         for o in outputs {
-                            m_batch.push(o);
+                            t_batch.push(o);
                         }
-                        //     for o in &outputs {
-                        //         batch.push(HybridDeviceType::Mouse, *o);
-                        //     }
                     }
 
                     continue;
                 }
-                // EventType::ABSOLUTE => {
-                //     let code = ev.code();
-                //     if code == AbsoluteAxisCode::ABS_X.0 {
-                //         context.update_pos(AbsoluteAxisCode::ABS_X, ev.value());
-                //     } else if code == AbsoluteAxisCode::ABS_Y.0 {
-                //         context.update_pos(AbsoluteAxisCode::ABS_Y, ev.value());
-                //     }
-                //     if code == AbsoluteAxisCode::ABS_X.0 || code == AbsoluteAxisCode::ABS_Y.0 {
-                //         let event = InputEvent::new_now(ev.event_type().0, ev.code(), ev.value());
-                //         m_batch.push(event);
-                //     }
-                //     t_batch.push(ev);
-                // }
                 // -----------------------------
                 // Forward everything else
                 // -----------------------------
@@ -209,17 +151,6 @@ pub fn remap_evdev(path: &str, debug: &bool, forward: &bool) -> Result<()> {
                     }
                     t_batch.clear();
                 }
-                //     if !m_batch.is_empty() {
-                //         virtual_mouse.emit(&m_batch)?;
-                //
-                //         if *debug {
-                //             for b in m_batch.iter() {
-                //                 debug!("Emitting Event : {:?}", b);
-                //             }
-                //             debug!("-------------- SYN_REPORT ------------");
-                //         }
-                //         m_batch.clear();
-                //     }
             }
         }
     }

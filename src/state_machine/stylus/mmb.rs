@@ -11,6 +11,7 @@ impl State<Context, Event, Output> for MMB {
         info!("mmb pressed");
         let ev = self.id().pressed;
         vec![
+            InputEvent::new(EventType::KEY.0, KeyCode::BTN_TOUCH.code(), 1),
             InputEvent::new_now(ev.event_type().0, ev.code(), ev.value()),
             InputEvent::new_now(EventType::SYNCHRONIZATION.0, 0, 0),
         ]
@@ -20,6 +21,7 @@ impl State<Context, Event, Output> for MMB {
         info!("mmb released");
         let ev = self.id().released;
         vec![
+            InputEvent::new(EventType::KEY.0, KeyCode::BTN_TOUCH.code(), 0),
             InputEvent::new_now(ev.event_type().0, ev.code(), ev.value()),
             InputEvent::new_now(EventType::SYNCHRONIZATION.0, 0, 0),
         ]
@@ -44,7 +46,7 @@ impl MMB {
     pub fn id(&self) -> ID {
         ID {
             keycode: KeyCode::BTN_STYLUS,
-            pressed: InputEvent::new(EventType::KEY.0, KeyCode::BTN_MIDDLE.code(), 1),
+            pressed: InputEvent::new(EventType::KEY.0, KeyCode::BTN_STYLUS.code(), 1),
             released: InputEvent::new(EventType::KEY.0, KeyCode::BTN_STYLUS.code(), 0),
         }
     }
